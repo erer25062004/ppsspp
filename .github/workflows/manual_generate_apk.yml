@@ -31,7 +31,7 @@ jobs:
         run: |
           echo "count=$(git tag -l 'v[0-9]*' | wc -l | tr -d ' ')" >> $GITHUB_OUTPUT
 
-      - name: Fetch upstream tags # required for git describe to return a valid version and to prevent androidGitVersion from crashing on a new fork
+      - name: Fetch upstream tags
         if: steps.valid-tags.outputs.count == '0'
         run: |
           git remote add upstream https://github.com/hrydgard/ppsspp.git
@@ -49,12 +49,8 @@ jobs:
         with:
           ndk-version: r26b
 
-      - name: Test androidGitVersion
-        run: |
-          echo "count=${{steps.valid-tags.outputs.count}}"
-          ./gradlew androidGitVersion
-      
       - name: Assemble APK
+        # Menggunakan flag resmi PPSSPP tanpa memanggil task lama yang sudah dihapus
         run: ./gradlew assembleRelease --parallel --build-cache
       
       - name: Package build
