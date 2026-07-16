@@ -55,11 +55,11 @@ jobs:
       
       - name: Package build
         run: |
-          find . -name "*.apk"
-          mkdir ppsspp
-          if [ -e android/build/*/apk/*/*/*.apk ]; then
-            cp android/build/*/apk/*/*/*.apk ppsspp/
-          fi
+          mkdir -p ppsspp
+          # Perbaikan: Mencari file APK secara menyeluruh di seluruh folder android/build/ tanpa batasan sub-folder lama
+          find android/build/ -name "*.apk" -exec cp {} ppsspp/ \;
+          # Log pengecekan untuk memastikan file benar-benar sudah tersalin ke folder ppsspp
+          ls -la ppsspp/
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
