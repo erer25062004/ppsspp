@@ -56,10 +56,30 @@ jobs:
       - name: Package build
         run: |
           mkdir -p ppsspp
-          # Perbaikan: Mencari file APK secara menyeluruh di seluruh folder android/build/ tanpa batasan sub-folder lama
-          find android/build/ -name "*.apk" -exec cp {} ppsspp/ \;
-          # Log pengecekan untuk memastikan file benar-benar sudah tersalin ke folder ppsspp
+          
+          echo "=== MEMULAI PENCARIAN APK ==="
+          # Jalur 1: Cek folder output standar Android Gradle terbaru
+          if [ -d android/app/build/outputs/apk ]; then
+            find android/app/build/outputs/apk/ -name "*.apk" -exec cp {} ppsspp/ \;
+          fi
+          
+          # Jalur 2: Cek folder build Android secara luas
+          if [ -d android/build ]; then
+            find android/build/ -name "*.apk" -exec cp {} ppsspp/ \;
+          fi
+          
+          # Jalur 3: Sapu bersih seluruh root directory jika jalur 1 & 2 meleset
+          find . -type f -name "*.apk" -not -path "./ppsspp/*" -exec cp {} ppsspp/ \;
+          
+          echo "=== ISI FOLDER PPSSPP YANG SIAP DI-UPLOAD ==="
           ls -la ppsspp/
+          
+          # JAMINAN 100%: Jika folder ppsspp ternyata kosong (APK gagal dicopy), 
+          # script akan dipaksa MERAH/ERROR saat itu juga agar kita tahu sistemnya gagal.
+          if [ -z "$(ls -A ppsspp)" ]; then
+            echo "ERROR: File APK PPSSPP tidak ditemukan di folder mana pun!"
+            exit 1
+          fi
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
